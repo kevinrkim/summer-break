@@ -1,6 +1,4 @@
-#!/bin/sh
-'''exec' "/Users/kevinkim/Library/Mobile Documents/com~apple~CloudDocs/Career/Canonical/summer-break/myenv/bin/python3" "$0" "$@"
-' '''
+#!/Users/kevinkim/code/summer-break/myenv/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -3,10 +3,9 @@ import pandas as pd
 import os
 
 app = Flask(__name__)
+transaction_data = None
 
-# process CSV into Python object transaction_data
-
-# POST API
+# POST API process CSV into Python object transaction_data
 @app.route('/transactions', methods=['POST'])
 def store_data():
     global transaction_data
@@ -24,17 +23,23 @@ def store_data():
 # GET API 
 @app.route('/report', methods=['GET'])
 def return_json():
+    global transaction_data
+
     if transaction_data is None:
         return jsonify({'error': 'no valid data found'})
     gross_revenue = 0
     expenses = 0
 
     for index, row in transaction_data.iterrows():
-        if row['type'] == 'Expense':
-            expenses += row['amount']
-        elif row['type'] == 'Income':
-            gross_revenue += row['amount']
+        print(pd.notna(row['type']))
+        if pd.notna(row['type']) and str(row['type']).strip() == 'Expense':
+            print(row['amount'])
+            expenses += float(row['amount'])
+        elif pd.notna(row['type']) and str(row['type']).strip() == 'Income':
+            print(row['amount'])
+            gross_revenue += float(row['amount'])
     net_revenue = gross_revenue - expenses
+
     output = [
         {
             "gross-revenue": gross_revenue,
