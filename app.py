@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 import pandas as pd
-import os
 
 app = Flask(__name__)
+
+# data from the POST API will be stored here
 transaction_data = None
 
 # POST API process CSV into Python object transaction_data
@@ -13,6 +14,7 @@ def store_data():
         return jsonify({'error': 'file not found'}), 400
     file = request.files['file']
 
+    # apply headers to the data and store into transaction_data
     if file and file.filename.endswith('.csv'):
         headers = ['date', 'type', 'amount', 'memo']
         transaction_data = pd.read_csv(file, header=None, names=headers)
@@ -23,13 +25,18 @@ def store_data():
 # GET API 
 @app.route('/report', methods=['GET'])
 def return_json():
+    # retrieve stored input data
     global transaction_data
 
     if transaction_data is None:
         return jsonify({'error': 'no valid data found'})
+    
+    # set variables to calculate total gross revenues and expenses
     gross_revenue = 0
     expenses = 0
 
+    # iterate over each line item, adding to gross_revenues if transaction type is 'Income'
+    # or adding to expenses if transaction type is 'Expense'
     for index, row in transaction_data.iterrows():
         print(pd.notna(row['type']))
         if pd.notna(row['type']) and str(row['type']).strip() == 'Expense':
@@ -38,8 +45,11 @@ def return_json():
         elif pd.notna(row['type']) and str(row['type']).strip() == 'Income':
             print(row['amount'])
             gross_revenue += float(row['amount'])
+
+    # calculate the net revenue
     net_revenue = gross_revenue - expenses
 
+    # store and return the output in the specified JSON format
     output = [
         {
             "gross-revenue": gross_revenue,
